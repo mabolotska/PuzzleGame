@@ -103,3 +103,51 @@
 //        return segments
 //    }
 //}
+//    @Published private(set) var image: UIImage? = nil
+//    @Published private(set) var isLoading = false
+//    let downloadManager = DownloadManager()
+//      var cancellables = Set<AnyCancellable>()
+//
+//    func downloadImageWithCombine() {
+//             isLoading = true
+//             downloadManager.downloadImageWithCombine()
+//                 .receive(on: DispatchQueue.main)
+//                 .sink { [weak self] completion in
+//                     self?.isLoading = false
+//                     if case .failure(let error) = completion {
+//                         print(error)
+//                     }
+//                 } receiveValue: { [weak self] image in
+//                     self?.image = image
+//                 }
+//                 .store(in: &cancellables)
+//         }
+// 
+//    func compareArrays() {
+        // Check if all items in shuffledSegments are in the same order as in segments
+//        let isWinner = shuffledSegments.enumerated().allSatisfy { index, shuffledItem in
+//            // Find the original index of the shuffled item
+//            if let originalIndex = segments.firstIndex(where: { $0.id == shuffledItem.id }) {
+//                return originalIndex == index // Check if indices match
+//            }
+//            return false
+//        }
+//
+//        if isWinner {
+//            print("You are winner")
+//        } else {
+//            print("Keep trying!")
+//        }
+        
+//    }
+    
+//    func handleTapGesture(for item: Item) {
+   //         Get index of the tapped item in shuffledSegments
+//           if let shuffledIndex = shuffledSegments.firstIndex(where: { $0.id == item.id }),
+//              let originalIndex = segments.firstIndex(where: { $0.id == item.id }) {
+//               if originalIndex == shuffledIndex {
+//                   print("Correct position!")
+//               }
+//               print("Tapped  index: \(originalIndex), shuffled index: \(shuffledIndex)")
+//           }
+ //      }
