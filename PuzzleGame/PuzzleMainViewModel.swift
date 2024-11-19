@@ -15,46 +15,24 @@ class ViewModel: ObservableObject {
     @Published var draggedItem: Item?
     @Published var image: UIImage?
     @Published var isLoading = false
-    @Published var hasInternet = true
-    let placeholder = UIImage(named: "test")
+    private let placeholder = UIImage(named: "test")
     let gridSize = 3
     private let imageLoader = AsyncImageLoader()
     private var cancellables = Set<AnyCancellable>()
-    @Published var state: PuzzleState = .loading
-
-    func loadImage() {
-        state = .loading
-        checkInternetConnection { [weak self] isConnected in
-            guard let self = self else { return }
-            if isConnected {
-                self.imageLoader.loadImage()
-                self.imageLoader.$image
-                    .compactMap { $0 }
-                    .first()
-                    .sink { [weak self] downloadedImage in
-                        guard let self = self else { return }
-                        self.image = downloadedImage
-                        self.prepareSegments(from: downloadedImage)
-                        self.state = .loaded
-                    }
-                    .store(in: &self.cancellables)
-            } else {
-                // No internet fallback
-                self.image = nil
-                self.prepareSegments(from: self.placeholder!)
-                self.state = .noInternet
-            }
-        }
-    }
     
-    private func checkInternetConnection(completion: @escaping (Bool) -> Void) {
-           DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-               let isConnected = Bool.random() // Simulate random connection
-               DispatchQueue.main.async {
-                   completion(isConnected)
-               }
-           }
-       }
+    func loadImage() {
+        isLoading = true
+        imageLoader.loadImage()
+        imageLoader.$image
+            .compactMap { $0 }
+            .first()
+            .sink { [weak self] downloadedImage in
+                self?.isLoading = false
+                self?.image = downloadedImage
+                self?.prepareSegments(from: downloadedImage)
+            }
+            .store(in: &cancellables)
+    }
 
     private func prepareSegments(from image: UIImage) {
         segments = splitImage(image, into: gridSize)

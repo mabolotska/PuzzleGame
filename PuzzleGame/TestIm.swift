@@ -9,66 +9,48 @@ struct Item: Identifiable, Hashable {
     var correctlyPlaced: Bool = false
 }
 
-enum PuzzleState {
-       case loading
-       case noInternet
-       case loaded
-   }
-
 struct PuzzleMainView: View {
     @StateObject private var viewModel = ViewModel()
 
 
     var body: some View {
-            VStack {
-                switch viewModel.state {
-                case .loading:
-                    ProgressView("Loading Image...")
-                        .padding()
-
-                case .noInternet:
-                    VStack {
-                        Text("No Internet Connection")
-                            .font(.title2)
-                            .foregroundColor(.red)
-                            .padding()
-                        Image(uiImage: viewModel.placeholder!)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(height: 300)
-                    }
-
-                case .loaded:
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: viewModel.gridSize), spacing: 3) {
-                        ForEach(viewModel.shuffledSegments) { item in
-                            Image(uiImage: item.image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: 100)
-                                .overlay(Rectangle().stroke(Color.gray, lineWidth: 1))
-                                .onDrag {
-                                    if item.correctlyPlaced {
-                                        return NSItemProvider() // Prevent dragging
-                                    }
-                                    self.viewModel.draggedItem = item
-                                    return NSItemProvider(object: item.image)
-                                }
-                                .onDrop(of: [UTType.image], delegate: NewCustomDropDelegate(
-                                    currentItem: item,
-                                    segments: viewModel.segments,
-                                    shuffledSegments: $viewModel.shuffledSegments,
-                                    draggedItem: $viewModel.draggedItem,
-                                    checkAndMarkPlacement: viewModel.equalSegmentsCheck
-                                ))
+        VStack {
+     
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: viewModel.gridSize), spacing: 3) {
+                ForEach(viewModel.shuffledSegments) { item in
+                    
+                    Image(uiImage: item.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 100)
+                        .overlay(Rectangle().stroke(Color.gray, lineWidth: 1))
+                        .onDrag {
+                            if item.correctlyPlaced {
+                                return NSItemProvider() // Return an empty NSItemProvider to prevent dragging
+                            }
+                            self.viewModel.draggedItem = item
+                            return NSItemProvider(object: item.image)
                         }
-                    }
-                    .padding()
+                        .onDrop(of: [UTType.image], delegate: NewCustomDropDelegate(
+                            currentItem: item,
+                            segments: viewModel.segments, shuffledSegments: $viewModel.shuffledSegments,
+                            draggedItem: $viewModel.draggedItem, // Pass the original segments
+                            checkAndMarkPlacement: viewModel.equalSegmentsCheck
+                        ))
+                    
                 }
             }
-            .onAppear {
-                viewModel.loadImage()
-            }
+            .padding()
+          if viewModel.isLoading {
+            ProgressView("Loading Image...")
+                .padding()
         }
+                
+    }
+        .onAppear {
+            viewModel.loadImage()
+        }
+    }
 }
 
 
