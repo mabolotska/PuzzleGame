@@ -1,13 +1,5 @@
-//
-//  PuzzleMainViewModel.swift
-//  PuzzleGame
-//
-//  Created by Maryna Bolotska on 18/11/24.
-//
-
 import SwiftUI
 import Combine
-import Network
 
 class ViewModel: ObservableObject {
     @Published var segments: [Item] = []
@@ -15,30 +7,33 @@ class ViewModel: ObservableObject {
     @Published var draggedItem: Item?
     @Published var image: UIImage?
     @Published var isLoading = false
+    @Published var showWinAlert = false
     private let placeholder = UIImage(named: "test")
     let gridSize = 3
-    private let imageLoader = AsyncImageLoader()
     private var cancellables = Set<AnyCancellable>()
+    private var imageDownloader = ImageDownloader()
     
     func loadImage() {
         isLoading = true
-        imageLoader.loadImage()
-        imageLoader.$image
-            .compactMap { $0 }
-            .first()
+        imageDownloader.fetchImage()
+        imageDownloader.$image
             .sink { [weak self] downloadedImage in
-                self?.isLoading = false
-                self?.image = downloadedImage
-                self?.prepareSegments(from: downloadedImage)
+                
+                if let image = downloadedImage {
+                    self?.image = image
+                    self?.prepareSegments(from: image)
+                    self?.isLoading = false
+                }
             }
             .store(in: &cancellables)
     }
-
+    
+    
     private func prepareSegments(from image: UIImage) {
         segments = splitImage(image, into: gridSize)
         shuffledSegments = segments.shuffled()
     }
-
+    
     func splitImage(_ image: UIImage, into gridSize: Int) -> [Item] {
         guard let cgImage = image.cgImage else {
             print("Failed to get CGImage from UIImage.")
@@ -64,7 +59,7 @@ class ViewModel: ObservableObject {
         print("Number of segments created: \(segments.count)")
         return segments
     }
-
+    
     func equalSegmentsCheck() {
         shuffledSegments.indices.forEach { index in
             if let originalIndex = segments.firstIndex(where: { $0.id == shuffledSegments[index].id }),
@@ -73,6 +68,16 @@ class ViewModel: ObservableObject {
             } else {
                 shuffledSegments[index].correctlyPlaced = false
             }
+        }
+    }
+    
+    func checkIfPuzzleIsDone() {
+        let isWin = segments.indices.allSatisfy { index in
+            segments[index].id == shuffledSegments[index].id
+        }
+        
+        if isWin {
+            showWinAlert = true
         }
     }
 }
