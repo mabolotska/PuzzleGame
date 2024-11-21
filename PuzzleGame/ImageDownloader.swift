@@ -7,7 +7,7 @@ class ImageDownloader: ObservableObject {
     
     func fetchImage() {
         guard let imageUrl = URL(string: url) else {
-            fallbackToSystemImage()
+            fallbackToTestImage()
             return
         }
         isLoading = true
@@ -17,7 +17,7 @@ class ImageDownloader: ObservableObject {
                   let downloadedImage = UIImage(data: data)
             else {
                 DispatchQueue.main.async {
-                    self?.fallbackToSystemImage()
+                    self?.fallbackToTestImage()
                     
                 }
                 return
@@ -30,7 +30,7 @@ class ImageDownloader: ObservableObject {
         }.resume()
     }
     
-    private func fallbackToSystemImage() {
+    private func fallbackToTestImage() {
         self.image = UIImage(named: "test")
     }
 }
