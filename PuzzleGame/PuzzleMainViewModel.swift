@@ -8,7 +8,6 @@ class ViewModel: ObservableObject {
     @Published var image: UIImage?
     @Published var isLoading = false
     @Published var showWinAlert = false
-    private let placeholder = UIImage(named: "test")
     let gridSize = 3
     private var cancellables = Set<AnyCancellable>()
     private var imageDownloader = ImageDownloader()
@@ -56,7 +55,6 @@ class ViewModel: ObservableObject {
                 }
             }
         }
-        print("Number of segments created: \(segments.count)")
         return segments
     }
     
